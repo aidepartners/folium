@@ -320,10 +320,6 @@ class Map(JSCSSMixin, MacroElement):
                 options = webdriver.firefox.options.Options()
                 options.add_argument('--headless')
                 driver = webdriver.Firefox(options=options)
-            options = webdriver.firefox.options.Options()
-            options.add_argument('--headless')
-            driver = webdriver.Firefox(options=options)
-
             html = self.get_root().render()
             with temp_html_filepath(html) as fname:
                 # We need the tempfile to avoid JS security issues.
