@@ -113,7 +113,7 @@ class TileLayer(Layer):
             max_zoom=max_zoom,
             max_native_zoom=max_native_zoom or max_zoom,
             no_wrap=no_wrap,
-            attribution=attr,
+            # attribution=attr,
             subdomains=subdomains,
             detect_retina=detect_retina,
             tms=tms,

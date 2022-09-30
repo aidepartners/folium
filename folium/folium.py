@@ -219,7 +219,8 @@ class Map(JSCSSMixin, MacroElement):
             left='0%',
             top='0%',
             position='relative',
-            tiles='OpenStreetMap',
+            layer=None,
+            tiles="OpenStreetMap",
             attr=None,
             min_zoom=0,
             max_zoom=18,
@@ -282,10 +283,34 @@ class Map(JSCSSMixin, MacroElement):
 
         self.objects_to_stay_in_front = []
 
-        if tiles:
+        # 에이드 커스텀
+        _attr = "Vworld"
+        _vworld = "634F43BA-BA1F-33EE-809E-95FF93DD76F1"
+        if not layer:
             tile_layer = TileLayer(tiles=tiles, attr=attr,
                                    min_zoom=min_zoom, max_zoom=max_zoom)
             self.add_child(tile_layer, name=tile_layer.tile_name)
+        else:
+            if layer.lower() == "gray":
+                _fileType = "png"
+                layer = "gray"
+            elif layer.lower() == "midnight":
+                _fileType = "png"
+                layer = "midnight"
+            elif layer.lower() == "hybrid":
+                _fileType = "png"
+                layer = "Hybrid"
+            elif layer.lower() == "satellite":
+                _fileType = "jpeg"
+                layer = "Satellite"
+            else:
+                _fileType = "png"
+                layer = "Base"
+            tiles = ""f"http://api.vworld.kr/req/wmts/1.0.0/{_vworld}/{layer}/{{z}}/{{y}}/{{x}}.{_fileType}"""
+            tile_layer = TileLayer(tiles=tiles, attr=_attr,
+                                   min_zoom=min_zoom, max_zoom=max_zoom)
+            self.add_child(tile_layer, name=tile_layer.tile_name)
+
 
     def _repr_html_(self, **kwargs):
         """Displays the HTML Map in a Jupyter notebook."""
