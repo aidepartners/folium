@@ -219,6 +219,7 @@ class Map(JSCSSMixin, MacroElement):
             left='0%',
             top='0%',
             position='relative',
+            aide=None,
             layer=None,
             tiles="OpenStreetMap",
             attr=None,
@@ -284,13 +285,8 @@ class Map(JSCSSMixin, MacroElement):
         self.objects_to_stay_in_front = []
 
         # 에이드 커스텀
-        _attr = "Vworld"
-        _vworld = "634F43BA-BA1F-33EE-809E-95FF93DD76F1"
-        if not layer:
-            tile_layer = TileLayer(tiles=tiles, attr=attr,
-                                   min_zoom=min_zoom, max_zoom=max_zoom)
-            self.add_child(tile_layer, name=tile_layer.tile_name)
-        else:
+        if aide.lower() == "vworld":
+            _vworld = "634F43BA-BA1F-33EE-809E-95FF93DD76F1"
             if layer.lower() == "gray":
                 _fileType = "png"
                 layer = "gray"
@@ -306,11 +302,41 @@ class Map(JSCSSMixin, MacroElement):
             else:
                 _fileType = "png"
                 layer = "Base"
-            tiles = ""f"http://api.vworld.kr/req/wmts/1.0.0/{_vworld}/{layer}/{{z}}/{{y}}/{{x}}.{_fileType}"""
-            tile_layer = TileLayer(tiles=tiles, attr=_attr,
+            tiles = f"""http://api.vworld.kr/req/wmts/1.0.0/{_vworld}/{layer}/{{z}}/{{y}}/{{x}}.{_fileType}"""
+            tile_layer = TileLayer(tiles=tiles, attr=aide.lower(),
                                    min_zoom=min_zoom, max_zoom=max_zoom)
             self.add_child(tile_layer, name=tile_layer.tile_name)
 
+        elif aide.lower() == "google":
+            _tiles_dict = {
+                "base": "http://mt0.google.com/vt/lyrs=m&hl=ko&x={x}&y={y}&z={z}",
+                "roadonly": "http://mt0.google.com/vt/lyrs=h&hl=ko&x={x}&y={y}&z={z}",
+                "altered": "http://mt0.google.com/vt/lyrs=r&hl=ko&x={x}&y={y}&z={z}",
+                "terrain": "http://mt0.google.com/vt/lyrs=p&hl=ko&x={x}&y={y}&z={z}",
+                "terrainonly": "http://mt0.google.com/vt/lyrs=t&hl=ko&x={x}&y={y}&z={z}",
+                "satelliteonly": "http://mt0.google.com/vt/lyrs=s&hl=ko&x={x}&y={y}&z={z}",
+                "hybrid": "http://mt0.google.com/vt/lyrs=y&hl=ko&x={x}&y={y}&z={z}",
+            }
+            tiles = _tiles_dict.get(layer.lower())
+            tile_layer = TileLayer(tiles=tiles, attr=aide.lower(),
+                                   min_zoom=min_zoom, max_zoom=max_zoom)
+            self.add_child(tile_layer, name=tile_layer.tile_name)
+
+        elif aide.lower() == "naver":
+            _tiles_dict = {
+                "base": "https://map.pstatic.net/nrb/styles/basic/1663918673/{z}/{x}/{y}@2x.png?mt=bg.ol.sw",
+                "satellite": "https://map.pstatic.net/nrb/styles/satellite/1663918673/{z}/{x}/{y}@2x.png?mt=bg.ol.sw",
+                "terrain": "https://map.pstatic.net/nrb/styles/terrain/1663918673/{z}/{x}/{y}@2x.png?mt=bg.ol.sw",
+                "cadastral": "https://map.pstatic.net/nrb/styles/basic/1663918673/{z}/{x}/{y}@2x.png?mt=bg.ol.sw.lp",
+            }
+            tiles = _tiles_dict.get(layer.lower())
+            tile_layer = TileLayer(tiles=tiles, attr=aide.lower(),
+                                   min_zoom=min_zoom, max_zoom=max_zoom)
+            self.add_child(tile_layer, name=tile_layer.tile_name)
+        else:
+            tile_layer = TileLayer(tiles=tiles, attr=attr,
+                                   min_zoom=min_zoom, max_zoom=max_zoom)
+            self.add_child(tile_layer, name=tile_layer.tile_name)
 
     def _repr_html_(self, **kwargs):
         """Displays the HTML Map in a Jupyter notebook."""
@@ -340,7 +366,8 @@ class Map(JSCSSMixin, MacroElement):
                 from webdriver_manager.chrome import ChromeDriverManager
                 options = webdriver.ChromeOptions()
                 options.add_argument('--headless')
-                driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+                driver = webdriver.Chrome(
+                    ChromeDriverManager().install(), options=options)
             else:
                 options = webdriver.firefox.options.Options()
                 options.add_argument('--headless')
